@@ -5,8 +5,6 @@ import { Form, Button, Alert } from 'react-bootstrap';
 // apollo hook and Login user mutation
 import { useMutation } from '@apollo/react-hooks';
 import { LOGIN_USER } from '../utils/mutations';
-
-// import { loginUser } from '../utils/API';
 import Auth from '../utils/auth';
 
 const LoginForm = () => {
@@ -19,36 +17,37 @@ const LoginForm = () => {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setUserFormData({ ...userFormData, [name]: value });
+  setUserFormData({ ...userFormData, [name]: value });
   };
 
   const handleFormSubmit = async (event) => {
+  event.preventDefault();
+
+  // check if form has everything (as per react-bootstrap docs)
+  const form = event.currentTarget;
+  if (form.checkValidity() === false) {
     event.preventDefault();
+    event.stopPropagation();
+  }
 
-    // check if form has everything (as per react-bootstrap docs)
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    try {
-      const { data } = await loginUser({
-        variables: { ...userFormData },
-      });
-
-      console.log(data);
-      Auth.login(data.login.token);
-    } catch (e) {
-      console.error(e);
-    }
-
-    setUserFormData({
-      username: '',
-      email: '',
-      password: '',
+  // we can use the loginUser function 
+  try {
+    const { data } = await loginUser({
+      variables: { ...userFormData },
     });
-  };
+
+    Auth.login(data.login.token);
+  } catch (e) {
+    console.error(e);
+    setShowAlert(true);
+  }
+
+  setUserFormData({
+    username: "",
+    email: "",
+    password: "",
+  });
+};
 
   return (
     <>
